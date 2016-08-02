@@ -5,10 +5,7 @@
  */
 package lk.ac.pdn.co328.studentSystem.dbimplementation;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import lk.ac.pdn.co328.studentSystem.Student;
 import lk.ac.pdn.co328.studentSystem.StudentRegister;
@@ -20,13 +17,15 @@ import lk.ac.pdn.co328.studentSystem.StudentRegister;
 public class DerbyStudentRegister extends StudentRegister {
 
     Connection connection = null;
+    private ArrayList<Student> studentList = new ArrayList<Student>();
     public DerbyStudentRegister() throws SQLException
     {
             String dbURL1 = "jdbc:derby:codejava/studentDB;create=true";
             connection = DriverManager.getConnection(dbURL1);
             if (connection != null)
             {
-                String SQL_CreateTable = "CREATE TABLE Students(id INT , name VARCHAR(24))";
+                reset();
+                String SQL_CreateTable = "CREATE TABLE Students(id INT , namef VARCHAR(24),namel VARCHAR(24))";
                 System.out.println ( "Creating table addresses..." );
                 try 
                 {
@@ -50,13 +49,17 @@ public class DerbyStudentRegister extends StudentRegister {
     public void addStudent(Student st) throws Exception {
         if (connection != null)
         {
-            String SQL_AddStudent = "INSERT INTO Students VALUES (" + st.getId() + ",'" + st.getFirstName() + "')";
+            String SQL_AddStudent = String.format(" INSERT INTO Students VALUES (%d,'%s','%s')", st.getId(), st.getFirstName(), st.getLastName());
             System.out.println ( "Adding the student..." + SQL_AddStudent);
 
-            Statement stmnt = connection.createStatement();
-            stmnt.execute(SQL_AddStudent );
-            stmnt.close();
-            System.out.println("Student Added");
+            try {
+                Statement stmnt = connection.createStatement();
+                stmnt.execute(SQL_AddStudent);
+                stmnt.close();
+                System.out.println("Student Added");
+            }catch (Exception e){
+                System.out.println(e);
+            }
 
         }
         else
@@ -67,17 +70,69 @@ public class DerbyStudentRegister extends StudentRegister {
 
     @Override
     public void removeStudent(int regNo) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        String SQL_deleteStudent = " DELETE FROM Students " + "WHERE id ="+ regNo;
+
+        try {
+            Statement stmnt = connection.createStatement();
+            stmnt.execute(SQL_deleteStudent );
+            stmnt.close();
+        } catch (SQLException e) {
+            //e.printStackTrace();
+            System.out.print(e);
+        }
+        System.out.println("Student Deleted.");
     }
 
     @Override
     public Student findStudent(int regNo) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Student st = null;
+        if (connection != null)
+        {
+            String SQL_findStudent = "SELECT * FROM  Students WHERE id = "+ regNo;
+            System.out.println ( "Finding the student "+ SQL_findStudent );
+
+            Statement stmnt = null;
+            try {
+                stmnt = connection.createStatement();
+                ResultSet rs = stmnt.executeQuery(SQL_findStudent);
+                while (rs.next()) {
+                    studentList.add(new Student(rs.getInt("id"), rs.getString("namef"), rs.getString("namel") ));
+                    st = new Student(rs.getInt("id"), rs.getString("namef"), rs.getString("namel"));
+                }
+                //for(int i = 0; i < studentList.size(); i++) {
+                //System.out.println("First name "+ st.getFirstName()+"   "+st.getLastName());
+                //}
+                stmnt.close();
+
+            } catch (SQLException e) {
+                System.out.println(e);
+            }
+
+            System.out.println("Student Found.");
+
+        }
+        else
+        {
+            System.out.println("ERROR : Something wrong with the connection.");
+        }
+        //st = new Student(studentList.get(0).getId(),studentList.get(0).getFirstName(),studentList.get(0).getLastName());
+        return st;
     }
 
     @Override
     public void reset() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
+        String SQL_resetStudent = "DROP TABLE Students";
+
+        try {
+            Statement stmnt = connection.createStatement();
+            stmnt.execute(SQL_resetStudent );
+            stmnt.close();
+        } catch (SQLException e) {
+            //e.printStackTrace();
+            System.out.print(e);
+        }
+        System.out.println("Student Cleared.");
     }
 
     @Override
