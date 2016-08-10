@@ -20,7 +20,13 @@ public class DerbyStudentRegister extends StudentRegister {
     private ArrayList<Student> studentList = new ArrayList<Student>();
     public DerbyStudentRegister() throws SQLException
     {
-            String dbURL1 = "jdbc:derby:codejava/studentDB;create=true";
+            String dbURL1 = "jdbc:derby:\\codejava\\studentDB.db;create=true";
+            try {
+                Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+            }catch(Exception e){
+                System.out.println(e);
+            }
+
             connection = DriverManager.getConnection(dbURL1);
             if (connection != null)
             {

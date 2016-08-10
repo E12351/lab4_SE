@@ -34,6 +34,7 @@ and open the template in the editor.
             {
                 $.ajax({
                     url: '../rest/student/' + $("#id_field").val(),
+                    //url: '../rest/student/1',
                     type: 'GET',
                     success: function(data,status,response) {
                        var object = response.responseJSON;
@@ -90,11 +91,11 @@ and open the template in the editor.
                     id: $("#id_field").val(),
                     firstName: $("#name_f").val(),
                     lastName: $("#name_l").val()
-                }
+                    }
                 }
                 document.getElementById("result").innerHTML= "Send";
                 $.ajax({
-                    url: '../rest/student/new',
+                    url: '../rest/student/'+ $("#id_field").val(),
                     type: 'PUT',
                     data: JSON.stringify(requestData),
                     contentType:'application/json; charset=UTF-8',
